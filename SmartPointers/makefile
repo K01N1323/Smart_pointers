@@ -4,7 +4,7 @@ TARGET := smart_pointers
 CPPFLAGS := -IInclude -IUi -ITests
 BASE_CXXFLAGS := -std=c++20 -Wall -Wextra -Wpedantic -MMD -MP
 
-SOURCES := Src/main.cpp Ui/Menu.cpp $(wildcard Tests/*.cpp)
+SOURCES := Src/main.cpp Ui/Menu.cpp
 OBJECTS := $(SOURCES:.cpp=.o)
 DEPENDENCIES := $(OBJECTS:.o=.d)
 
