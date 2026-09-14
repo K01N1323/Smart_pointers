@@ -8,9 +8,7 @@
 #include "ShrdPtr.hpp"
 #include "TestObject.hpp"
 
-// Сохранить как PolymorphismTests.hpp. Сборка: C++20.
-// Запускать последовательно, без других живых TestObject.
-// inline позволяет подключать hpp в несколько cpp.
+
 inline void check_polymorphism(bool condition, const char* test_name, int& tests_passed, int& tests_failed) {
     if (condition) {
         std::cout << "  Успешно: " << test_name << "\n";
@@ -21,8 +19,8 @@ inline void check_polymorphism(bool condition, const char* test_name, int& tests
     }
 }
 
-// Абстрактный базовый класс. Виртуальный деструктор обязателен
-// для удаления дочернего объекта через Base* в наших указателях.
+
+
 class PolyTestBase {
 private:
     TestObject value;
@@ -44,7 +42,7 @@ public:
     int Calculate() const noexcept override {return GetValue() * 2;}
 };
 
-// Три уровня наследования: у каждого уровня свой TestObject.
+// Три уровня наследования
 class PolyTestLeaf : public PolyTestDerived {
 private:
     TestObject LeafValue;
@@ -64,8 +62,7 @@ public:
     int GetMarker() const noexcept {return Marker;}
 };
 
-// Base здесь не первый базовый класс. Нельзя вручную считать смещение:
-// при преобразовании Derived* -> Base* адрес корректирует компилятор.
+
 class PolyTestMultiple : public PolyTestSide, public PolyTestBase {
 private:
     TestObject ExtraValue;
@@ -184,7 +181,6 @@ inline int run_polymorphism_tests() {
         check_polymorphism(TestObject::GetAliveCount() == 0, "ShrdPtr удаляет полный объект при множественном наследовании", tests_passed, tests_failed);
 
         // 7. Разные динамические типы за единым интерфейсом.
-        // Это массив УМНЫХ УКАЗАТЕЛЕЙ, не опасное преобразование Derived[] -> Base[].
         {
             UnqPtr<PolyTestBase> Objects[3];
             Objects[0].reset(new PolyTestDerived(2));
@@ -208,9 +204,6 @@ inline int run_polymorphism_tests() {
     return tests_failed;
 }
 
-// Обратное преобразование Base -> Derived и преобразование Derived[] -> Base[]
-// должны отклоняться компилятором. Они не являются выполняемыми сценариями.
-// Невиртуальный деструктор Base в этой реализации не поддерживается:
-// запуск такого удаления был бы неопределенным поведением, а не безопасным тестом.
+
 
 #endif // POLYMORPHISM_TESTS_HPP

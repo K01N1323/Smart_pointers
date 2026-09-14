@@ -26,7 +26,7 @@ public:
     UnqPtr& operator=(const UnqPtr& other) = delete;
 
     // перемещения конструктор 
-    UnqPtr(UnqPtr&& other) noexcept: pointer(other.pointer) {other.pointer = nullptr;}
+    UnqPtr(UnqPtr&& other) noexcept: pointer(other.release()) {}
 
     template <typename U>
     requires std::convertible_to<U*, T*>
@@ -97,7 +97,12 @@ public:
     UnqPtr() noexcept = default;
 
     // Принятие владения сырым указателем на массив
-    explicit UnqPtr(T* NewPointer) noexcept: pointer(NewPointer) {}
+    template <typename U>
+    requires std::convertible_to<U(*)[], T(*)[]>
+    explicit UnqPtr(U* NewPointer) noexcept: pointer(NewPointer) {}
+
+    // создание пустого указателя из nullptr
+    explicit UnqPtr(std::nullptr_t) noexcept {}
 
     // Деструктор массива
     ~UnqPtr() noexcept{
@@ -109,7 +114,14 @@ public:
     UnqPtr& operator=(const UnqPtr& other) = delete;
 
     // перемещения конструктор
-    UnqPtr(UnqPtr&& other) noexcept: pointer(other.pointer) {other.pointer = nullptr;}
+    UnqPtr(UnqPtr&& other) noexcept: pointer(other.pointer) {
+        other.pointer = nullptr;
+    }
+
+    // перемещения конструктор массива совместимого типа
+    template <typename U>
+    requires std::convertible_to<U(*)[], T(*)[]>
+    UnqPtr(UnqPtr<U[]>&& other) noexcept: pointer(other.release()) {}
 
     UnqPtr& operator=(UnqPtr&& other) noexcept{
         if (this != &other){
@@ -118,6 +130,15 @@ public:
             this->pointer = other.pointer;
             other.pointer = nullptr;
         }
+
+        return *this;
+    }
+
+    // перемещающее присваивание массива совместимого типа
+    template <typename U>
+    requires std::convertible_to<U(*)[], T(*)[]>
+    UnqPtr& operator=(UnqPtr<U[]>&& other) noexcept{
+        reset(other.release());
 
         return *this;
     }
@@ -137,12 +158,21 @@ public:
         return RawPointer;
     }
 
-    void reset(T* NewPointer = nullptr) noexcept{
+    template <typename U>
+    requires std::convertible_to<U(*)[], T(*)[]>
+    void reset(U* NewPointer) noexcept{
         if (pointer == NewPointer) {return;}
 
         delete[] pointer;
 
         pointer = NewPointer;
+    }
+
+    // освобождение массива без принятия нового указателя
+    void reset(std::nullptr_t = nullptr) noexcept{
+        delete[] pointer;
+
+        pointer = nullptr;
     }
 
     void swap(UnqPtr& other) noexcept{
@@ -151,7 +181,6 @@ public:
         pointer = other.pointer;
         other.pointer = TempPointer;
     }
-
 };
 
 template <typename T>

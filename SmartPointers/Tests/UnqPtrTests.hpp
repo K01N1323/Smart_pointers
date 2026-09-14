@@ -39,12 +39,12 @@ public:
     int GetKind() const noexcept override {return 2;}
 };
 
-// Возвращает количество проваленных проверок. 0 означает успешный запуск.
+// Возвращает количество проваленных проверок.
 inline int run_unq_ptr_tests() {
     int tests_passed = 0;
     int tests_failed = 0;
 
-    std::cout << "\n--- Тестирование UnqPtr ---\n";
+    std::cout << "\nТестирование UnqPtr\n";
 
     if (TestObject::GetAliveCount() != 0) {
         std::cout << "Нельзя начинать тесты: есть живые TestObject.\n";
@@ -54,7 +54,7 @@ inline int run_unq_ptr_tests() {
 
     try {
 
-        // 1. Пустой указатель
+        //  Пустой указатель
         {
             UnqPtr<TestObject> pointer;
             UnqPtr<TestObject> second(nullptr);
@@ -405,38 +405,4 @@ inline int run_unq_ptr_tests() {
     return tests_failed;
 }
 
-// Отдельные РУЧНЫЕ проверки запретов компиляции.
-// Это НЕ выполненные проверки: они не входят в счетчики выше.
-// Временно вставляй в функцию по ОДНОМУ примеру и пробуй собрать проект.
-// Каждый пример должен вызвать ошибку компиляции; затем убери его.
-//
-// 1. Запрет копирования одиночного владельца:
-// UnqPtr<int> first(new int(1));
-// UnqPtr<int> second(first);
-//
-// 2. Запрет копирующего присваивания:
-// UnqPtr<int> first(new int(1));
-// UnqPtr<int> second;
-// second = first;
-//
-// 3. Запрет копирования массива (проверить отдельно и конструктор, и =):
-// UnqPtr<int[]> first(new int[2]);
-// UnqPtr<int[]> second(first);
-// second = first;
-//
-// 4. Запрет Derived[] -> Base[] в конструкторе:
-// UnqPtr<UnqTestBase[]> pointer(new UnqTestDerived[2]);
-//
-// 5. Запрет Derived[] -> Base[] в reset:
-// UnqPtr<UnqTestBase[]> pointer;
-// pointer.reset(new UnqTestDerived[2]);
-//
-// 6. Запрет обратного преобразования Base -> Derived:
-// UnqPtr<UnqTestBase> first(new UnqTestBase);
-// UnqPtr<UnqTestDerived> second(std::move(first));
-//
-// Не выполняй примеры 4 и 5, если они компилируются:
-// это ошибка ограничений UnqPtr<T[]>, а запуск может привести к UB.
-// Виртуальный деструктор НЕ делает преобразование массивов безопасным.
-
-#endif // UNQ_PTR_TESTS_HPP
+#endif // unq ptr tests 

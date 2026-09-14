@@ -8,11 +8,6 @@
 #include "ShrdPtr.hpp"
 #include "TestObject.hpp"
 
-// Сохранить как ShrdPtrTests.hpp. Сборка: C++20.
-// Каждый вызов check_shrd — отдельная проверка.
-// inline нужен для подключения этого hpp в несколько cpp без ошибки линковки.
-// Тесты запускаются последовательно, без других живых TestObject.
-// Это функциональные проверки, не замеры производительности.
 
 inline void check_shrd(bool condition, const char* test_name, int& tests_passed, int& tests_failed) {
     if (condition) {
@@ -24,8 +19,7 @@ inline void check_shrd(bool condition, const char* test_name, int& tests_passed,
     }
 }
 
-// У каждой части объекта свой TestObject: счетчики проверяют уничтожение обеих.
-// В нашей реализации удаление через Base требует виртуального деструктора.
+
 class ShrdTestBase {
 private:
     TestObject value;
@@ -627,12 +621,6 @@ inline int run_shrd_ptr_tests() {
     return tests_failed;
 }
 
-// Ограничения этих функциональных тестов:
-// - Не имитируют нехватку памяти при создании ReferenceCount.
-// - Счетчики TestObject не обнаруживают отдельную утечку ReferenceCount:
-//   для нее нужна дополнительная проверка санитайзером.
-// - Не проверяют многопоточность: текущий счетчик не атомарный.
-// - Не создают циклы совместного владения и не выполняют операции с UB.
-// - Здесь нет преобразования массивов Derived[] -> Base[]: оно запрещено.
+
 
 #endif // SHRD_PTR_TESTS_HPP
