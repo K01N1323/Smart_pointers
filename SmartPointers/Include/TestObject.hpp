@@ -19,7 +19,7 @@ private:
     static inline std::size_t MoveAssignmentCount = 0;
 
 public:
-    // Создание пустого объекта, в том числе элемента массива
+    // Создание пустого объекта
     TestObject() noexcept: TestObject(0) {}
 
     // Создание объекта с заданным значением

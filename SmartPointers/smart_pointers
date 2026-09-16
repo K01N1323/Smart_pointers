@@ -1,0 +1,5 @@
+#!/bin/sh
+cd -- "$(dirname -- "$0")" || exit 1
+export ASAN_OPTIONS=detect_leaks=0:halt_on_error=1
+export UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1
+exec ./build/sanitize/smart_pointers "$@"

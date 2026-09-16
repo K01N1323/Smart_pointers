@@ -3,31 +3,30 @@
 
 #include <stdexcept>
 #include <utility>
+#include <type_traits>
 
 #include "UnqPtr.hpp"
 
 // Класс для представления динамического массива
 template <class T> class DynamicArray {
 private:
-    UnqPtr<T[]> items; // Умный указатель на элементы массива
-    int size = 0; // Текущий размер массива
+    UnqPtr<T[]> items;
+    int size = 0;
 
 public:
     // Конструктор пустого массива
     DynamicArray() noexcept = default;
 
-    // Конструктор: создает массив заданного размера
+    // Создаю массив заданного размера
     explicit DynamicArray(int size) : DynamicArray(nullptr, size) {}
 
-    // Конструктор: проверяет и инициализирует массив переданными элементами
+    // Создаю массив и копирую переданные элементы
     DynamicArray(const T *items, int count) {
         if (count < 0) {
             throw std::invalid_argument("Размер массива не может быть отрицательным");
         }
 
-        if (count == 0) {
-            return;
-        }
+        if (count == 0) {return;}
 
         UnqPtr<T[]> NewItems(new T[count]{});
 
@@ -37,23 +36,36 @@ public:
             }
         }
 
-        this->items = std::move(NewItems);
         this->size = count;
+        this->items = std::move(NewItems);
     }
 
     // Конструктор копирования
-    DynamicArray(const DynamicArray<T> &dynamic_array): items(dynamic_array.size > 0 ? new T[dynamic_array.size]{} : nullptr), size(dynamic_array.size) {
-        for (int element = 0; element < size; element++) {
-            items[element] = dynamic_array.items[element];
+    DynamicArray(const DynamicArray<T> &dynamic_array) {
+        int NewSize = dynamic_array.size;
+        UnqPtr<T[]> NewItems(NewSize > 0 ? new T[NewSize]{} : nullptr);
+
+        for (int element = 0; element < NewSize; element++) {
+            NewItems[element] = dynamic_array.items[element];
         }
+
+        size = NewSize;
+        items = std::move(NewItems);
     }
 
     // Копирующее присваивание
     DynamicArray<T> &operator=(const DynamicArray<T> &dynamic_array) {
         if (this == &dynamic_array) {return *this;}
 
-        DynamicArray<T> TempArray(dynamic_array);
-        swap(TempArray);
+        int NewSize = dynamic_array.size;
+        UnqPtr<T[]> NewItems(NewSize > 0 ? new T[NewSize]{} : nullptr);
+
+        for (int element = 0; element < NewSize; element++) {
+            NewItems[element] = dynamic_array.items[element];
+        }
+
+        size = NewSize;
+        items = std::move(NewItems);
 
         return *this;
     }
@@ -67,19 +79,22 @@ public:
     DynamicArray<T> &operator=(DynamicArray<T> &&dynamic_array) noexcept {
         if (this == &dynamic_array) {return *this;}
 
-        items = std::move(dynamic_array.items);
-        size = dynamic_array.size;
+        int NewSize = dynamic_array.size;
+        UnqPtr<T[]> NewItems(std::move(dynamic_array.items));
         dynamic_array.size = 0;
+
+        size = NewSize;
+        items = std::move(NewItems);
 
         return *this;
     }
 
-    // Возвращает размер массива
+    // Возвращаю размер массива
     int GetSize() const noexcept {
         return size;
     }
 
-    // Получает элемент по индексу
+    // Возвращаю элемент без возможности изменения
     const T &Get(int index) const {
         if (index < 0 || index >= size) {
             throw std::out_of_range("Индекс невалиден");
@@ -88,7 +103,7 @@ public:
         return items[index];
     }
 
-    // Получает изменяемый элемент по индексу
+    // Возвращаю изменяемый элемент
     T &Get(int index) {
         if (index < 0 || index >= size) {
             throw std::out_of_range("Индекс невалиден");
@@ -97,7 +112,7 @@ public:
         return items[index];
     }
 
-    // Устанавливает значение элемента по индексу
+    // Копирую значение в элемент
     void Set(int index, const T &value) {
         if (index < 0 || index >= size) {
             throw std::out_of_range("Индекс невалиден");
@@ -106,7 +121,7 @@ public:
         items[index] = value;
     }
 
-    // Перемещает значение в элемент по индексу
+    // Перемещаю значение в элемент
     void Set(int index, T &&value) {
         if (index < 0 || index >= size) {
             throw std::out_of_range("Индекс невалиден");
@@ -115,7 +130,7 @@ public:
         items[index] = std::move(value);
     }
 
-    // Изменяет размер массива
+    // Изменяю размер массива
     void Resize(int new_size) {
         if (new_size < 0) {
             throw std::invalid_argument("Размер массива не может быть отрицательным");
@@ -127,20 +142,24 @@ public:
         int ElementsToMove = (new_size < size) ? new_size : size;
 
         for (int element = 0; element < ElementsToMove; element++) {
-            NewItems[element] = std::move_if_noexcept(items[element]);
+            if constexpr (std::is_nothrow_move_assignable_v<T> || !std::is_copy_assignable_v<T>) {
+                NewItems[element] = std::move(items[element]);
+            } else {
+                NewItems[element] = items[element];
+            }
         }
 
-        items = std::move(NewItems);
         size = new_size;
+        items = std::move(NewItems);
     }
 
-    // Очищает массив
+    // Очищаю массив
     void Clear() noexcept {
-        items.reset();
         size = 0;
+        items.reset();
     }
 
-    // Обменивает содержимое массивов
+    // Обмениваю содержимое массивов
     void swap(DynamicArray<T> &other) noexcept {
         items.swap(other.items);
 
@@ -149,7 +168,7 @@ public:
         other.size = TempSize;
     }
 
-    // Освобождение массива выполняет UnqPtr
+    // Память освобождается через UnqPtr
     ~DynamicArray() noexcept = default;
 };
 

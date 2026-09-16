@@ -173,7 +173,7 @@ static bool RunShrdDemo() {
     ShrdPtr<TestObject> first;
     ShrdPtr<TestObject> second;
 
-    std::cout << "\nShrdPtr: несколько владельцев могут удерживать один объект.\n";
+    std::cout << "\nShrdPtr: несколько владельцев могут указывать на  один объект.\n";
 
     while (true) {
         std::cout << "\nСостояние ShrdPtr\n";

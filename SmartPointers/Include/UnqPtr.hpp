@@ -10,22 +10,22 @@ private:
     T* pointer = nullptr;
 
 public:
-    // пустой конструктор 
+    // пустой конструктор
     UnqPtr() noexcept = default;
 
     // Принятие владения сырым указателем
     explicit UnqPtr(T* NewPointer) noexcept : pointer(NewPointer) {}
 
-    // Деструктор 
+    // Деструктор
     ~UnqPtr() noexcept{
         delete pointer;
     }
 
-    // запрещенное копирование 
+    // запрещенное копирование
     UnqPtr(const UnqPtr& other) = delete;
     UnqPtr& operator=(const UnqPtr& other) = delete;
 
-    // перемещения конструктор 
+    // перемещения конструктор
     UnqPtr(UnqPtr&& other) noexcept: pointer(other.release()) {}
 
     template <typename U>
@@ -34,11 +34,7 @@ public:
 
     UnqPtr& operator=(UnqPtr&& other) noexcept{
         if (this != &other){
-            delete this->pointer;
-
-            this->pointer = other.pointer;
-            other.pointer = nullptr;
-
+            reset(other.release());
         }
 
         return *this;
@@ -52,7 +48,7 @@ public:
         return *this;
     }
 
-    // доступ 
+    // доступ
     T* get() const noexcept {return pointer;}
 
     T& operator*() const noexcept{return *pointer;}
@@ -61,7 +57,7 @@ public:
 
     explicit operator bool() const noexcept {return pointer != nullptr;}
 
-    // управление влоадением
+    // управление владением
     [[nodiscard]] T* release() noexcept{
         T* RawPointer = this->pointer;
         this->pointer = nullptr;
@@ -72,9 +68,10 @@ public:
     void reset(T* NewPointer = nullptr) noexcept{
         if (pointer == NewPointer) {return;}
 
-        delete pointer;
-
+        T* TempPointer = pointer;
         pointer = NewPointer;
+
+        delete TempPointer;
     }
 
     void swap(UnqPtr& other) noexcept{
@@ -114,9 +111,7 @@ public:
     UnqPtr& operator=(const UnqPtr& other) = delete;
 
     // перемещения конструктор
-    UnqPtr(UnqPtr&& other) noexcept: pointer(other.pointer) {
-        other.pointer = nullptr;
-    }
+    UnqPtr(UnqPtr&& other) noexcept: pointer(other.release()) {}
 
     // перемещения конструктор массива совместимого типа
     template <typename U>
@@ -125,10 +120,7 @@ public:
 
     UnqPtr& operator=(UnqPtr&& other) noexcept{
         if (this != &other){
-            delete[] this->pointer;
-
-            this->pointer = other.pointer;
-            other.pointer = nullptr;
+            reset(other.release());
         }
 
         return *this;
@@ -163,16 +155,18 @@ public:
     void reset(U* NewPointer) noexcept{
         if (pointer == NewPointer) {return;}
 
-        delete[] pointer;
-
+        T* TempPointer = pointer;
         pointer = NewPointer;
+
+        delete[] TempPointer;
     }
 
     // освобождение массива без принятия нового указателя
     void reset(std::nullptr_t = nullptr) noexcept{
-        delete[] pointer;
-
+        T* TempPointer = pointer;
         pointer = nullptr;
+
+        delete[] TempPointer;
     }
 
     void swap(UnqPtr& other) noexcept{
@@ -187,6 +181,5 @@ template <typename T>
 void swap(UnqPtr<T>& first, UnqPtr<T>& second) noexcept {
     first.swap(second);
 }
-
 
 #endif // UNQ_PTR_H

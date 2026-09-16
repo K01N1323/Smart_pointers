@@ -62,7 +62,7 @@ public:
         ReferenceCount = NewReferenceCount;
     }
 
-    // копирование совместного владения
+    // копирование 
     ShrdPtr(const ShrdPtr& other): pointer(other.pointer), ReferenceCount(other.ReferenceCount){
         if (ReferenceCount){
             (*ReferenceCount)++;
@@ -81,11 +81,15 @@ public:
     ShrdPtr& operator=(const ShrdPtr& other){
         if (this == &other) {return *this;}
 
+        T* NewPointer = other.pointer;
+        std::size_t* NewReferenceCount = other.ReferenceCount;
+
+        if (NewReferenceCount) {(*NewReferenceCount)++;}
+
         ReleaseCurrentOwnership();
 
-        pointer = other.pointer;
-        ReferenceCount = other.ReferenceCount;
-        if (ReferenceCount) {(*ReferenceCount)++;}
+        pointer = NewPointer;
+        ReferenceCount = NewReferenceCount;
 
         return *this;
     }
@@ -94,11 +98,15 @@ public:
     template <typename U>
     requires std::convertible_to<U*, T*>
     ShrdPtr& operator=(const ShrdPtr<U>& other){
+        T* NewPointer = other.pointer;
+        std::size_t* NewReferenceCount = other.ReferenceCount;
+
+        if (NewReferenceCount) {(*NewReferenceCount)++;}
+
         ReleaseCurrentOwnership();
 
-        pointer = other.pointer;
-        ReferenceCount = other.ReferenceCount;
-        if (ReferenceCount) {(*ReferenceCount)++;}
+        pointer = NewPointer;
+        ReferenceCount = NewReferenceCount;
 
         return *this;
     }
@@ -120,12 +128,16 @@ public:
     ShrdPtr& operator=(ShrdPtr&& other) noexcept{
         if (this == &other) {return *this;}
 
-        ReleaseCurrentOwnership();
+        T* NewPointer = other.pointer;
+        std::size_t* NewReferenceCount = other.ReferenceCount;
 
-        pointer = other.pointer;
-        ReferenceCount = other.ReferenceCount;
         other.pointer = nullptr;
         other.ReferenceCount = nullptr;
+
+        ReleaseCurrentOwnership();
+
+        pointer = NewPointer;
+        ReferenceCount = NewReferenceCount;
 
         return *this;
     }
@@ -134,12 +146,16 @@ public:
     template <typename U>
     requires std::convertible_to<U*, T*>
     ShrdPtr& operator=(ShrdPtr<U>&& other) noexcept{
-        ReleaseCurrentOwnership();
+        T* NewPointer = other.pointer;
+        std::size_t* NewReferenceCount = other.ReferenceCount;
 
-        pointer = other.pointer;
-        ReferenceCount = other.ReferenceCount;
         other.pointer = nullptr;
         other.ReferenceCount = nullptr;
+
+        ReleaseCurrentOwnership();
+
+        pointer = NewPointer;
+        ReferenceCount = NewReferenceCount;
 
         return *this;
     }
@@ -154,7 +170,7 @@ public:
     T& operator*() const noexcept {return *pointer;}
     T* operator->() const noexcept {return pointer;}
     explicit operator bool() const noexcept { return pointer != nullptr;}
-
+    
     // информация о владении
     std::size_t UseCount() const noexcept {
         if (ReferenceCount == nullptr) {return 0;}
@@ -178,10 +194,11 @@ public:
         }
 
         std::size_t* NewReferenceCount = new std::size_t(1);
+        T* NewPointer = other.release();
 
         ReleaseCurrentOwnership();
 
-        pointer = other.release();
+        pointer = NewPointer;
         ReferenceCount = NewReferenceCount;
     }
 
@@ -195,10 +212,11 @@ public:
         }
 
         std::size_t* NewReferenceCount = new std::size_t(1);
+        T* NewPointer = other.release();
 
         ReleaseCurrentOwnership();
 
-        pointer = other.release();
+        pointer = NewPointer;
         ReferenceCount = NewReferenceCount;
     }
 
@@ -290,8 +308,15 @@ public:
     ShrdPtr& operator=(const ShrdPtr& other){
         if (this == &other) {return *this;}
 
-        ShrdPtr TempPointer(other);
-        swap(TempPointer);
+        T* NewPointer = other.pointer;
+        std::size_t* NewReferenceCount = other.ReferenceCount;
+
+        if (NewReferenceCount) {(*NewReferenceCount)++;}
+
+        ReleaseCurrentOwnership();
+
+        pointer = NewPointer;
+        ReferenceCount = NewReferenceCount;
 
         return *this;
     }
@@ -300,8 +325,15 @@ public:
     template <typename U>
     requires std::convertible_to<U(*)[], T(*)[]>
     ShrdPtr& operator=(const ShrdPtr<U[]>& other){
-        ShrdPtr TempPointer(other);
-        swap(TempPointer);
+        T* NewPointer = other.pointer;
+        std::size_t* NewReferenceCount = other.ReferenceCount;
+
+        if (NewReferenceCount) {(*NewReferenceCount)++;}
+
+        ReleaseCurrentOwnership();
+
+        pointer = NewPointer;
+        ReferenceCount = NewReferenceCount;
 
         return *this;
     }
@@ -323,8 +355,16 @@ public:
     ShrdPtr& operator=(ShrdPtr&& other) noexcept{
         if (this == &other) {return *this;}
 
-        ShrdPtr TempPointer(static_cast<ShrdPtr&&>(other));
-        swap(TempPointer);
+        T* NewPointer = other.pointer;
+        std::size_t* NewReferenceCount = other.ReferenceCount;
+
+        other.pointer = nullptr;
+        other.ReferenceCount = nullptr;
+
+        ReleaseCurrentOwnership();
+
+        pointer = NewPointer;
+        ReferenceCount = NewReferenceCount;
 
         return *this;
     }
@@ -333,8 +373,16 @@ public:
     template <typename U>
     requires std::convertible_to<U(*)[], T(*)[]>
     ShrdPtr& operator=(ShrdPtr<U[]>&& other) noexcept{
-        ShrdPtr TempPointer(static_cast<ShrdPtr<U[]>&&>(other));
-        swap(TempPointer);
+        T* NewPointer = other.pointer;
+        std::size_t* NewReferenceCount = other.ReferenceCount;
+
+        other.pointer = nullptr;
+        other.ReferenceCount = nullptr;
+
+        ReleaseCurrentOwnership();
+
+        pointer = NewPointer;
+        ReferenceCount = NewReferenceCount;
 
         return *this;
     }
@@ -370,16 +418,36 @@ public:
     }
 
     void reset(UnqPtr<T[]>&& other){
-        ShrdPtr TempPointer(static_cast<UnqPtr<T[]>&&>(other));
-        swap(TempPointer);
+        if (!other) {
+            ReleaseCurrentOwnership();
+            return;
+        }
+
+        std::size_t* NewReferenceCount = new std::size_t(1);
+        T* NewPointer = other.release();
+
+        ReleaseCurrentOwnership();
+
+        pointer = NewPointer;
+        ReferenceCount = NewReferenceCount;
     }
 
     // получение владения массивом совместимого типа
     template <typename U>
     requires std::convertible_to<U(*)[], T(*)[]>
     void reset(UnqPtr<U[]>&& other){
-        ShrdPtr TempPointer(static_cast<UnqPtr<U[]>&&>(other));
-        swap(TempPointer);
+        if (!other) {
+            ReleaseCurrentOwnership();
+            return;
+        }
+
+        std::size_t* NewReferenceCount = new std::size_t(1);
+        T* NewPointer = other.release();
+
+        ReleaseCurrentOwnership();
+
+        pointer = NewPointer;
+        ReferenceCount = NewReferenceCount;
     }
 
     void swap(ShrdPtr& other) noexcept{

@@ -42,7 +42,7 @@ public:
     int Calculate() const noexcept override {return GetValue() * 2;}
 };
 
-// Три уровня наследования
+// еще наследник
 class PolyTestLeaf : public PolyTestDerived {
 private:
     TestObject LeafValue;
