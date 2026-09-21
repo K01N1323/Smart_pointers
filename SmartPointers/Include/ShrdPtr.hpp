@@ -6,30 +6,47 @@
 
 #include "UnqPtr.hpp"
 
+
+struct ShrdPtrControlBlock {
+    std::size_t StrongCount = 1;
+    std::size_t WeakCount = 1;
+};
+
+template <typename T>
+class WeakPtr;
+
 template <typename T>
 class ShrdPtr {
 private:
     T* pointer = nullptr;
-    std::size_t* ReferenceCount = nullptr;
+    ShrdPtrControlBlock* ReferenceCount = nullptr;
 
     template <typename U>
     friend class ShrdPtr;
 
+    template <typename U>
+    friend class WeakPtr;
+
     void ReleaseCurrentOwnership() noexcept{
-        if (ReferenceCount == nullptr) {
-            pointer = nullptr;
-            return;
-        }
-
-        --(*ReferenceCount);
-
-        if (*ReferenceCount == 0) {
-            delete pointer;
-            delete ReferenceCount;
-        }
+        T* TempPointer = pointer;
+        ShrdPtrControlBlock* TempReferenceCount = ReferenceCount;
 
         pointer = nullptr;
         ReferenceCount = nullptr;
+
+        if (TempReferenceCount == nullptr) {return;}
+
+        --(TempReferenceCount->StrongCount);
+
+        if (TempReferenceCount->StrongCount == 0) {
+            delete TempPointer;
+
+     
+            --(TempReferenceCount->WeakCount);
+            if (TempReferenceCount->WeakCount == 0) {
+                delete TempReferenceCount;
+            }
+        }
     }
 
 public:
@@ -42,7 +59,7 @@ public:
             return;
         }
 
-        std::size_t* NewReferenceCount = new std::size_t(1);
+        ShrdPtrControlBlock* NewReferenceCount = new ShrdPtrControlBlock();
 
         pointer = other.release();
         ReferenceCount = NewReferenceCount;
@@ -56,7 +73,7 @@ public:
             return;
         }
 
-        std::size_t* NewReferenceCount = new std::size_t(1);
+        ShrdPtrControlBlock* NewReferenceCount = new ShrdPtrControlBlock();
 
         pointer = other.release();
         ReferenceCount = NewReferenceCount;
@@ -65,7 +82,7 @@ public:
     // копирование 
     ShrdPtr(const ShrdPtr& other): pointer(other.pointer), ReferenceCount(other.ReferenceCount){
         if (ReferenceCount){
-            (*ReferenceCount)++;
+            (ReferenceCount->StrongCount)++;
         }
     }
 
@@ -74,7 +91,7 @@ public:
     requires std::convertible_to<U*, T*>
     ShrdPtr(const ShrdPtr<U>& other): pointer(other.pointer), ReferenceCount(other.ReferenceCount){
         if (ReferenceCount){
-            (*ReferenceCount)++;
+            (ReferenceCount->StrongCount)++;
         }
     }
 
@@ -82,9 +99,9 @@ public:
         if (this == &other) {return *this;}
 
         T* NewPointer = other.pointer;
-        std::size_t* NewReferenceCount = other.ReferenceCount;
+        ShrdPtrControlBlock* NewReferenceCount = other.ReferenceCount;
 
-        if (NewReferenceCount) {(*NewReferenceCount)++;}
+        if (NewReferenceCount) {(NewReferenceCount->StrongCount)++;}
 
         ReleaseCurrentOwnership();
 
@@ -99,9 +116,9 @@ public:
     requires std::convertible_to<U*, T*>
     ShrdPtr& operator=(const ShrdPtr<U>& other){
         T* NewPointer = other.pointer;
-        std::size_t* NewReferenceCount = other.ReferenceCount;
+        ShrdPtrControlBlock* NewReferenceCount = other.ReferenceCount;
 
-        if (NewReferenceCount) {(*NewReferenceCount)++;}
+        if (NewReferenceCount) {(NewReferenceCount->StrongCount)++;}
 
         ReleaseCurrentOwnership();
 
@@ -129,7 +146,7 @@ public:
         if (this == &other) {return *this;}
 
         T* NewPointer = other.pointer;
-        std::size_t* NewReferenceCount = other.ReferenceCount;
+        ShrdPtrControlBlock* NewReferenceCount = other.ReferenceCount;
 
         other.pointer = nullptr;
         other.ReferenceCount = nullptr;
@@ -147,7 +164,7 @@ public:
     requires std::convertible_to<U*, T*>
     ShrdPtr& operator=(ShrdPtr<U>&& other) noexcept{
         T* NewPointer = other.pointer;
-        std::size_t* NewReferenceCount = other.ReferenceCount;
+        ShrdPtrControlBlock* NewReferenceCount = other.ReferenceCount;
 
         other.pointer = nullptr;
         other.ReferenceCount = nullptr;
@@ -174,7 +191,7 @@ public:
     // информация о владении
     std::size_t UseCount() const noexcept {
         if (ReferenceCount == nullptr) {return 0;}
-        return *ReferenceCount;
+        return ReferenceCount->StrongCount;
     }
 
     bool unique() const noexcept{
@@ -193,7 +210,7 @@ public:
             return;
         }
 
-        std::size_t* NewReferenceCount = new std::size_t(1);
+        ShrdPtrControlBlock* NewReferenceCount = new ShrdPtrControlBlock();
         T* NewPointer = other.release();
 
         ReleaseCurrentOwnership();
@@ -211,7 +228,7 @@ public:
             return;
         }
 
-        std::size_t* NewReferenceCount = new std::size_t(1);
+        ShrdPtrControlBlock* NewReferenceCount = new ShrdPtrControlBlock();
         T* NewPointer = other.release();
 
         ReleaseCurrentOwnership();
@@ -222,7 +239,7 @@ public:
 
     void swap(ShrdPtr& other) noexcept{
         T* TempPointer = pointer;
-        std::size_t* TempReferenceCount = ReferenceCount;
+        ShrdPtrControlBlock* TempReferenceCount = ReferenceCount;
 
         pointer = other.pointer;
         ReferenceCount = other.ReferenceCount;
@@ -237,26 +254,34 @@ template <typename T>
 class ShrdPtr<T[]> {
 private:
     T* pointer = nullptr;
-    std::size_t* ReferenceCount = nullptr;
+    ShrdPtrControlBlock* ReferenceCount = nullptr;
 
     template <typename U>
     friend class ShrdPtr;
 
+    template <typename U>
+    friend class WeakPtr;
+
     void ReleaseCurrentOwnership() noexcept{
-        if (ReferenceCount == nullptr) {
-            pointer = nullptr;
-            return;
-        }
-
-        --(*ReferenceCount);
-
-        if (*ReferenceCount == 0) {
-            delete[] pointer;
-            delete ReferenceCount;
-        }
+        T* TempPointer = pointer;
+        ShrdPtrControlBlock* TempReferenceCount = ReferenceCount;
 
         pointer = nullptr;
         ReferenceCount = nullptr;
+
+        if (TempReferenceCount == nullptr) {return;}
+
+        --(TempReferenceCount->StrongCount);
+
+        if (TempReferenceCount->StrongCount == 0) {
+            delete[] TempPointer;
+
+            // Убираю служебную ссылку после уничтожения объекта и его полей.
+            --(TempReferenceCount->WeakCount);
+            if (TempReferenceCount->WeakCount == 0) {
+                delete TempReferenceCount;
+            }
+        }
     }
 
 public:
@@ -269,7 +294,7 @@ public:
             return;
         }
 
-        std::size_t* NewReferenceCount = new std::size_t(1);
+        ShrdPtrControlBlock* NewReferenceCount = new ShrdPtrControlBlock();
 
         pointer = other.release();
         ReferenceCount = NewReferenceCount;
@@ -283,7 +308,7 @@ public:
             return;
         }
 
-        std::size_t* NewReferenceCount = new std::size_t(1);
+        ShrdPtrControlBlock* NewReferenceCount = new ShrdPtrControlBlock();
 
         pointer = other.release();
         ReferenceCount = NewReferenceCount;
@@ -292,7 +317,7 @@ public:
     // копирование совместного владения массивом
     ShrdPtr(const ShrdPtr& other): pointer(other.pointer), ReferenceCount(other.ReferenceCount){
         if (ReferenceCount){
-            (*ReferenceCount)++;
+            (ReferenceCount->StrongCount)++;
         }
     }
 
@@ -301,7 +326,7 @@ public:
     requires std::convertible_to<U(*)[], T(*)[]>
     ShrdPtr(const ShrdPtr<U[]>& other): pointer(other.pointer), ReferenceCount(other.ReferenceCount){
         if (ReferenceCount){
-            (*ReferenceCount)++;
+            (ReferenceCount->StrongCount)++;
         }
     }
 
@@ -309,9 +334,9 @@ public:
         if (this == &other) {return *this;}
 
         T* NewPointer = other.pointer;
-        std::size_t* NewReferenceCount = other.ReferenceCount;
+        ShrdPtrControlBlock* NewReferenceCount = other.ReferenceCount;
 
-        if (NewReferenceCount) {(*NewReferenceCount)++;}
+        if (NewReferenceCount) {(NewReferenceCount->StrongCount)++;}
 
         ReleaseCurrentOwnership();
 
@@ -326,9 +351,9 @@ public:
     requires std::convertible_to<U(*)[], T(*)[]>
     ShrdPtr& operator=(const ShrdPtr<U[]>& other){
         T* NewPointer = other.pointer;
-        std::size_t* NewReferenceCount = other.ReferenceCount;
+        ShrdPtrControlBlock* NewReferenceCount = other.ReferenceCount;
 
-        if (NewReferenceCount) {(*NewReferenceCount)++;}
+        if (NewReferenceCount) {(NewReferenceCount->StrongCount)++;}
 
         ReleaseCurrentOwnership();
 
@@ -356,7 +381,7 @@ public:
         if (this == &other) {return *this;}
 
         T* NewPointer = other.pointer;
-        std::size_t* NewReferenceCount = other.ReferenceCount;
+        ShrdPtrControlBlock* NewReferenceCount = other.ReferenceCount;
 
         other.pointer = nullptr;
         other.ReferenceCount = nullptr;
@@ -374,7 +399,7 @@ public:
     requires std::convertible_to<U(*)[], T(*)[]>
     ShrdPtr& operator=(ShrdPtr<U[]>&& other) noexcept{
         T* NewPointer = other.pointer;
-        std::size_t* NewReferenceCount = other.ReferenceCount;
+        ShrdPtrControlBlock* NewReferenceCount = other.ReferenceCount;
 
         other.pointer = nullptr;
         other.ReferenceCount = nullptr;
@@ -403,7 +428,7 @@ public:
     std::size_t UseCount() const noexcept{
         if (ReferenceCount == nullptr) {return 0;}
 
-        return *ReferenceCount;
+        return ReferenceCount->StrongCount;
     }
 
     bool unique() const noexcept{
@@ -423,7 +448,7 @@ public:
             return;
         }
 
-        std::size_t* NewReferenceCount = new std::size_t(1);
+        ShrdPtrControlBlock* NewReferenceCount = new ShrdPtrControlBlock();
         T* NewPointer = other.release();
 
         ReleaseCurrentOwnership();
@@ -441,7 +466,7 @@ public:
             return;
         }
 
-        std::size_t* NewReferenceCount = new std::size_t(1);
+        ShrdPtrControlBlock* NewReferenceCount = new ShrdPtrControlBlock();
         T* NewPointer = other.release();
 
         ReleaseCurrentOwnership();
@@ -452,7 +477,7 @@ public:
 
     void swap(ShrdPtr& other) noexcept{
         T* TempPointer = pointer;
-        std::size_t* TempReferenceCount = ReferenceCount;
+        ShrdPtrControlBlock* TempReferenceCount = ReferenceCount;
 
         pointer = other.pointer;
         ReferenceCount = other.ReferenceCount;
