@@ -1,4 +1,6 @@
+<img width="1440" height="520" alt="performance_scaling" src="https://github.com/user-attachments/assets/1d33fd35-c9fe-4362-aff4-e7beabc5a444" />
 # Smart pointers
+<img width="1400" height="945" alt="performance_ratio" src="https://github.com/user-attachments/assets/5f8bff89-a443-4764-ac70-09926676d95a" />
 
 ## Сборка и запуск
 
@@ -181,6 +183,162 @@ requires std::convertible_to<U(*)[], T(*)[]>
 Отсутствие сообщения санитайзера означает, что в выполненных ветках программы ошибка не обнаружена. Для полной проверки нужно запускать все пункты меню.
 
 ## Тесты производительности
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="945" viewBox="0 0 1400 945">
+<rect width="100%" height="100%" fill="#0d1117"/>
+<style>text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}</style>
+<text x="50" y="48" fill="#f0f6fc" font-size="28" font-weight="700">Моя реализация относительно std</text>
+<text x="50" y="80" fill="#8b949e" font-size="17">N = 100 000; меньше 1 — моя реализация быстрее, больше 1 — медленнее</text>
+<line x1="516.62" y1="100" x2="516.62" y2="883" stroke="#30363d" stroke-width="1"/>
+<text x="516.62" y="919" fill="#8b949e" font-size="15" text-anchor="middle">0.2</text>
+<line x1="824.38" y1="100" x2="824.38" y2="883" stroke="#30363d" stroke-width="1"/>
+<text x="824.38" y="919" fill="#8b949e" font-size="15" text-anchor="middle">0.5</text>
+<line x1="1057.19" y1="100" x2="1057.19" y2="883" stroke="#f0f6fc" stroke-width="2"/>
+<text x="1057.19" y="919" fill="#8b949e" font-size="15" text-anchor="middle">1</text>
+<line x1="1290.00" y1="100" x2="1290.00" y2="883" stroke="#30363d" stroke-width="1"/>
+<text x="1290.00" y="919" fill="#8b949e" font-size="15" text-anchor="middle">2</text>
+<text x="402" y="136" fill="#c9d1d9" font-size="15" text-anchor="end">UnqPtr · создание и освобождение</text>
+<rect x="1057.19" y="120" width="17.32" height="22" rx="5" fill="#f0883e"/>
+<text x="1082.51" y="137" fill="#f0f6fc" font-size="14" font-weight="600" text-anchor="start">1.053</text>
+<text x="402" y="174" fill="#c9d1d9" font-size="15" text-anchor="end">UnqPtr · перемещение</text>
+<rect x="1053.37" y="158" width="3.82" height="22" rx="5" fill="#2f81f7"/>
+<text x="1045.37" y="175" fill="#f0f6fc" font-size="14" font-weight="600" text-anchor="end">0.989</text>
+<text x="402" y="212" fill="#c9d1d9" font-size="15" text-anchor="end">UnqPtr · reset последнего владельца</text>
+<rect x="1057.19" y="196" width="22.69" height="22" rx="5" fill="#f0883e"/>
+<text x="1087.88" y="213" fill="#f0f6fc" font-size="14" font-weight="600" text-anchor="start">1.070</text>
+<text x="402" y="250" fill="#c9d1d9" font-size="15" text-anchor="end">UnqPtr · get и разыменование</text>
+<rect x="1057.19" y="234" width="4.21" height="22" rx="5" fill="#f0883e"/>
+<text x="1069.40" y="251" fill="#f0f6fc" font-size="14" font-weight="600" text-anchor="start">1.013</text>
+<text x="402" y="288" fill="#c9d1d9" font-size="15" text-anchor="end">ShrdPtr · создание и освобождение</text>
+<rect x="1054.87" y="272" width="2.32" height="22" rx="5" fill="#2f81f7"/>
+<text x="1046.87" y="289" fill="#f0f6fc" font-size="14" font-weight="600" text-anchor="end">0.993</text>
+<text x="402" y="326" fill="#c9d1d9" font-size="15" text-anchor="end">ShrdPtr · перемещение</text>
+<rect x="1057.19" y="310" width="36.63" height="22" rx="5" fill="#f0883e"/>
+<text x="1101.82" y="327" fill="#f0f6fc" font-size="14" font-weight="600" text-anchor="start">1.115</text>
+<text x="402" y="364" fill="#c9d1d9" font-size="15" text-anchor="end">ShrdPtr · reset последнего владельца</text>
+<rect x="1026.84" y="348" width="30.35" height="22" rx="5" fill="#2f81f7"/>
+<text x="1018.84" y="365" fill="#f0f6fc" font-size="14" font-weight="600" text-anchor="end">0.914</text>
+<text x="402" y="402" fill="#c9d1d9" font-size="15" text-anchor="end">ShrdPtr · копирование и reset копий</text>
+<rect x="1001.97" y="386" width="55.22" height="22" rx="5" fill="#2f81f7"/>
+<text x="993.97" y="403" fill="#f0f6fc" font-size="14" font-weight="600" text-anchor="end">0.848</text>
+<text x="402" y="440" fill="#c9d1d9" font-size="15" text-anchor="end">ShrdPtr · доступ и счетчик</text>
+<rect x="1027.65" y="424" width="29.54" height="22" rx="5" fill="#2f81f7"/>
+<text x="1019.65" y="441" fill="#f0f6fc" font-size="14" font-weight="600" text-anchor="end">0.916</text>
+<text x="402" y="478" fill="#c9d1d9" font-size="15" text-anchor="end">WeakPtr · создание из shared и reset</text>
+<rect x="1057.19" y="462" width="42.25" height="22" rx="5" fill="#f0883e"/>
+<text x="1107.44" y="479" fill="#f0f6fc" font-size="14" font-weight="600" text-anchor="start">1.134</text>
+<text x="402" y="516" fill="#c9d1d9" font-size="15" text-anchor="end">WeakPtr · копирование и reset</text>
+<rect x="1057.19" y="500" width="190.62" height="22" rx="5" fill="#f0883e"/>
+<text x="1255.82" y="517" fill="#f0f6fc" font-size="14" font-weight="600" text-anchor="start">1.764</text>
+<text x="402" y="554" fill="#c9d1d9" font-size="15" text-anchor="end">WeakPtr · перемещение</text>
+<rect x="1057.19" y="538" width="65.68" height="22" rx="5" fill="#f0883e"/>
+<text x="1130.87" y="555" fill="#f0f6fc" font-size="14" font-weight="600" text-anchor="start">1.216</text>
+<text x="402" y="592" fill="#c9d1d9" font-size="15" text-anchor="end">WeakPtr · lock живого объекта</text>
+<rect x="495.71" y="576" width="561.48" height="22" rx="5" fill="#2f81f7"/>
+<text x="487.71" y="593" fill="#f0f6fc" font-size="14" font-weight="600" text-anchor="end">0.188</text>
+<text x="402" y="630" fill="#c9d1d9" font-size="15" text-anchor="end">WeakPtr · lock уничтоженного объекта</text>
+<rect x="565.14" y="614" width="492.05" height="22" rx="5" fill="#2f81f7"/>
+<text x="557.14" y="631" fill="#f0f6fc" font-size="14" font-weight="600" text-anchor="end">0.231</text>
+<text x="402" y="668" fill="#c9d1d9" font-size="15" text-anchor="end">WeakPtr · expired и счетчик</text>
+<rect x="1057.19" y="652" width="2.00" height="22" rx="5" fill="#f0883e"/>
+<text x="1065.20" y="669" fill="#f0f6fc" font-size="14" font-weight="600" text-anchor="start">1.000</text>
+<text x="402" y="706" fill="#c9d1d9" font-size="15" text-anchor="end">UnqPtr[] · создание и освобождение</text>
+<rect x="1049.76" y="690" width="7.43" height="22" rx="5" fill="#2f81f7"/>
+<text x="1041.76" y="707" fill="#f0f6fc" font-size="14" font-weight="600" text-anchor="end">0.978</text>
+<text x="402" y="744" fill="#c9d1d9" font-size="15" text-anchor="end">UnqPtr[] · доступ по индексу</text>
+<rect x="1015.40" y="728" width="41.79" height="22" rx="5" fill="#2f81f7"/>
+<text x="1007.40" y="745" fill="#f0f6fc" font-size="14" font-weight="600" text-anchor="end">0.883</text>
+<text x="402" y="782" fill="#c9d1d9" font-size="15" text-anchor="end">ShrdPtr[] · создание и освобождение</text>
+<rect x="1040.01" y="766" width="17.19" height="22" rx="5" fill="#2f81f7"/>
+<text x="1032.01" y="783" fill="#f0f6fc" font-size="14" font-weight="600" text-anchor="end">0.950</text>
+<text x="402" y="820" fill="#c9d1d9" font-size="15" text-anchor="end">ShrdPtr[] · доступ по индексу</text>
+<rect x="1057.19" y="804" width="10.70" height="22" rx="5" fill="#f0883e"/>
+<text x="1075.89" y="821" fill="#f0f6fc" font-size="14" font-weight="600" text-anchor="start">1.032</text>
+<text x="402" y="858" fill="#c9d1d9" font-size="15" text-anchor="end">WeakPtr[] · lock живого массива</text>
+<rect x="514.99" y="842" width="542.20" height="22" rx="5" fill="#2f81f7"/>
+<text x="506.99" y="859" fill="#f0f6fc" font-size="14" font-weight="600" text-anchor="end">0.199</text>
+</svg>
+
+
+![Uploading perfo<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="520" viewBox="0 0 1440 520">
+<rect width="100%" height="100%" fill="#0d1117"/>
+<style>text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}</style>
+<text x="50" y="48" fill="#f0f6fc" font-size="28" font-weight="700">Масштабирование времени выполнения</text>
+<text x="50" y="80" fill="#8b949e" font-size="17">Медиана семи release-замеров; шкала времени своя для каждого сценария</text>
+<line x1="1040" y1="54" x2="1080" y2="54" stroke="#2f81f7" stroke-width="4"/><text x="1090" y="60" fill="#c9d1d9" font-size="15">Моя реализация</text>
+<line x1="1240" y1="54" x2="1280" y2="54" stroke="#f0883e" stroke-width="4"/><text x="1290" y="60" fill="#c9d1d9" font-size="15">std</text>
+<rect x="55.00" y="115" width="411.33" height="330" rx="12" fill="#161b22" stroke="#30363d"/>
+<text x="260.67" y="145" fill="#f0f6fc" font-size="17" font-weight="600" text-anchor="middle">UnqPtr: создание и освобождение</text>
+<line x1="107.00" y1="403.00" x2="448.33" y2="403.00" stroke="#30363d"/>
+<text x="99.00" y="408.00" fill="#8b949e" font-size="12" text-anchor="end">0.00</text>
+<line x1="107.00" y1="342.50" x2="448.33" y2="342.50" stroke="#30363d"/>
+<text x="99.00" y="347.50" fill="#8b949e" font-size="12" text-anchor="end">0.68</text>
+<line x1="107.00" y1="282.00" x2="448.33" y2="282.00" stroke="#30363d"/>
+<text x="99.00" y="287.00" fill="#8b949e" font-size="12" text-anchor="end">1.36</text>
+<line x1="107.00" y1="221.50" x2="448.33" y2="221.50" stroke="#30363d"/>
+<text x="99.00" y="226.50" fill="#8b949e" font-size="12" text-anchor="end">2.04</text>
+<line x1="107.00" y1="161.00" x2="448.33" y2="161.00" stroke="#30363d"/>
+<text x="99.00" y="166.00" fill="#8b949e" font-size="12" text-anchor="end">2.71</text>
+<polyline points="127.00,401.32 277.67,385.93 428.33,192.57" fill="none" stroke="#2f81f7" stroke-width="4"/>
+<circle cx="127.00" cy="401.32" r="5" fill="#2f81f7"/>
+<circle cx="277.67" cy="385.93" r="5" fill="#2f81f7"/>
+<circle cx="428.33" cy="192.57" r="5" fill="#2f81f7"/>
+<polyline points="127.00,401.35 277.67,386.94 428.33,203.14" fill="none" stroke="#f0883e" stroke-width="4"/>
+<circle cx="127.00" cy="401.35" r="5" fill="#f0883e"/>
+<circle cx="277.67" cy="386.94" r="5" fill="#f0883e"/>
+<circle cx="428.33" cy="203.14" r="5" fill="#f0883e"/>
+<text x="127.00" y="429" fill="#8b949e" font-size="13" text-anchor="middle">1,000</text>
+<text x="277.67" y="429" fill="#8b949e" font-size="13" text-anchor="middle">10,000</text>
+<text x="428.33" y="429" fill="#8b949e" font-size="13" text-anchor="middle">100,000</text>
+<text x="69.00" y="173" fill="#8b949e" font-size="12">мс</text>
+<rect x="514.33" y="115" width="411.33" height="330" rx="12" fill="#161b22" stroke="#30363d"/>
+<text x="720.00" y="145" fill="#f0f6fc" font-size="17" font-weight="600" text-anchor="middle">ShrdPtr: создание и освобождение</text>
+<line x1="566.33" y1="403.00" x2="907.67" y2="403.00" stroke="#30363d"/>
+<text x="558.33" y="408.00" fill="#8b949e" font-size="12" text-anchor="end">0.00</text>
+<line x1="566.33" y1="342.50" x2="907.67" y2="342.50" stroke="#30363d"/>
+<text x="558.33" y="347.50" fill="#8b949e" font-size="12" text-anchor="end">1.53</text>
+<line x1="566.33" y1="282.00" x2="907.67" y2="282.00" stroke="#30363d"/>
+<text x="558.33" y="287.00" fill="#8b949e" font-size="12" text-anchor="end">3.07</text>
+<line x1="566.33" y1="221.50" x2="907.67" y2="221.50" stroke="#30363d"/>
+<text x="558.33" y="226.50" fill="#8b949e" font-size="12" text-anchor="end">4.60</text>
+<line x1="566.33" y1="161.00" x2="907.67" y2="161.00" stroke="#30363d"/>
+<text x="558.33" y="166.00" fill="#8b949e" font-size="12" text-anchor="end">6.14</text>
+<polyline points="586.33,401.50 737.00,384.76 887.67,194.02" fill="none" stroke="#2f81f7" stroke-width="4"/>
+<circle cx="586.33" cy="401.50" r="5" fill="#2f81f7"/>
+<circle cx="737.00" cy="384.76" r="5" fill="#2f81f7"/>
+<circle cx="887.67" cy="194.02" r="5" fill="#2f81f7"/>
+<polyline points="586.33,401.42 737.00,383.24 887.67,192.57" fill="none" stroke="#f0883e" stroke-width="4"/>
+<circle cx="586.33" cy="401.42" r="5" fill="#f0883e"/>
+<circle cx="737.00" cy="383.24" r="5" fill="#f0883e"/>
+<circle cx="887.67" cy="192.57" r="5" fill="#f0883e"/>
+<text x="586.33" y="429" fill="#8b949e" font-size="13" text-anchor="middle">1,000</text>
+<text x="737.00" y="429" fill="#8b949e" font-size="13" text-anchor="middle">10,000</text>
+<text x="887.67" y="429" fill="#8b949e" font-size="13" text-anchor="middle">100,000</text>
+<text x="528.33" y="173" fill="#8b949e" font-size="12">мс</text>
+<rect x="973.67" y="115" width="411.33" height="330" rx="12" fill="#161b22" stroke="#30363d"/>
+<text x="1179.33" y="145" fill="#f0f6fc" font-size="17" font-weight="600" text-anchor="middle">WeakPtr: lock живого объекта</text>
+<line x1="1025.67" y1="403.00" x2="1367.00" y2="403.00" stroke="#30363d"/>
+<text x="1017.67" y="408.00" fill="#8b949e" font-size="12" text-anchor="end">0.00</text>
+<line x1="1025.67" y1="342.50" x2="1367.00" y2="342.50" stroke="#30363d"/>
+<text x="1017.67" y="347.50" fill="#8b949e" font-size="12" text-anchor="end">0.38</text>
+<line x1="1025.67" y1="282.00" x2="1367.00" y2="282.00" stroke="#30363d"/>
+<text x="1017.67" y="287.00" fill="#8b949e" font-size="12" text-anchor="end">0.75</text>
+<line x1="1025.67" y1="221.50" x2="1367.00" y2="221.50" stroke="#30363d"/>
+<text x="1017.67" y="226.50" fill="#8b949e" font-size="12" text-anchor="end">1.13</text>
+<line x1="1025.67" y1="161.00" x2="1367.00" y2="161.00" stroke="#30363d"/>
+<text x="1017.67" y="166.00" fill="#8b949e" font-size="12" text-anchor="end">1.50</text>
+<polyline points="1045.67,402.65 1196.33,399.47 1347.00,363.45" fill="none" stroke="#2f81f7" stroke-width="4"/>
+<circle cx="1045.67" cy="402.65" r="5" fill="#2f81f7"/>
+<circle cx="1196.33" cy="399.47" r="5" fill="#2f81f7"/>
+<circle cx="1347.00" cy="363.45" r="5" fill="#2f81f7"/>
+<polyline points="1045.67,401.15 1196.33,385.02 1347.00,192.57" fill="none" stroke="#f0883e" stroke-width="4"/>
+<circle cx="1045.67" cy="401.15" r="5" fill="#f0883e"/>
+<circle cx="1196.33" cy="385.02" r="5" fill="#f0883e"/>
+<circle cx="1347.00" cy="192.57" r="5" fill="#f0883e"/>
+<text x="1045.67" y="429" fill="#8b949e" font-size="13" text-anchor="middle">1,000</text>
+<text x="1196.33" y="429" fill="#8b949e" font-size="13" text-anchor="middle">10,000</text>
+<text x="1347.00" y="429" fill="#8b949e" font-size="13" text-anchor="middle">100,000</text>
+<text x="987.67" y="173" fill="#8b949e" font-size="12">мс</text>
+</svg>rmance_scaling.svg…]()
 
 Исходный код измерений находится в [`Tests/PerformanceTests.hpp`](Tests/PerformanceTests.hpp). Моя реализация сравнивается только с указателем того же назначения:
 
